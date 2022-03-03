@@ -19,6 +19,7 @@ import {
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {GetLocationOfDevice} from './src/utils/helperMethods';
+import {API_KEY} from './src/constants';
 
 const App = () => {
   const [long, setLong] = React.useState(37);
@@ -28,9 +29,25 @@ const App = () => {
     GetLocationOfDevice().then(loc => {
       setLong(loc.longitude);
       setLat(loc.latitude);
-      console.log(loc);
+      // console.log(loc);
     });
   }, []);
+
+  React.useEffect(() => async () => {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=minutely&appid=${API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    if (response) {
+      console.log(response);
+    }
+  });
 
   const isDarkMode = useColorScheme() === 'dark';
 
