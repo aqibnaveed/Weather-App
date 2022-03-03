@@ -19,35 +19,44 @@ import {
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {GetLocationOfDevice} from './src/utils/helperMethods';
+import {WeatherAPI} from './src/utils/api';
 import {API_KEY} from './src/constants';
+import {DailyWeather} from './src/components/DailyWeather';
+import {daily, weekly} from './src/data/weather';
+import {WeeklyWeather} from './src/components/WeeklyWeather';
 
 const App = () => {
-  const [long, setLong] = React.useState(37);
-  const [lat, setLat] = React.useState(73);
+  const [long, setLong] = React.useState(1);
+  const [lat, setLat] = React.useState(1);
+  const [data, setData] = React.useState();
 
   React.useEffect(() => {
     GetLocationOfDevice().then(loc => {
-      setLong(loc.longitude);
-      setLat(loc.latitude);
-      // console.log(loc);
+      if (loc.latitude) {
+        setLong(loc.longitude);
+        setLat(loc.latitude);
+      }
     });
   }, []);
 
-  React.useEffect(() => async () => {
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=minutely&appid=${API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-    if (response) {
-      console.log(response);
-    }
-  });
+  React.useEffect(
+    () => () => {
+      setData();
+      // if(lat && long) {
+      //   fetch(
+      //   `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=minutely&appid=${API_KEY}&units=imperial`,
+      //   {
+      //     method: 'GET'
+      //   },
+      //   ).then(
+      //     res => {return res.json()}
+      //   ).then(
+      //     res => setData(res)
+      //   )
+      // }
+    },
+    [lat, long],
+  );
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -56,40 +65,21 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={{backgroundStyle}}>
       <StatusBar barStyle={isDarkMode ? 'dark-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
+      <View contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Text>{lat}</Text>
-          <Text>{long}</Text>
+          <DailyWeather data={daily} />
+          <WeeklyWeather data={weekly} />
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const styles = StyleSheet.create({});
 
 export default App;
